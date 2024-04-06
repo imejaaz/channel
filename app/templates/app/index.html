@@ -7,25 +7,58 @@
 </head>
 <body>
     <p>Welcome to my Chat application</p>
+    <textarea  id="chat-log" cols="80" rows="20"></textarea><br>
+    <input type="text" id="message" size="86" placeholder="type your message here"><br>
+    <div align="right"><input type="button" id="submit" value="send" align="right"></div>
+
+
+
+
+
+
 
     <script>
-    
 
+    var ws = new WebSocket ('ws://127.0.0.1:8000/ws/sc/')
 
-
-    var ws = WebSocket('http://127.0.0.1:8000/ws/sc/')
     ws.onopen = function (event) {
         console.log('connection establised sucessfuly');
+        ws.send('message from client');
+    }
+
+    ws.onmessage = function (event) {
+        console.log('message received', event);
+        var message = event.data
+        console.log(message);
+        var textarea = document.getElementById("chat-log").innerText += message + '\n';
+    }
+
+    ws.onerror = function (event) {
+        console.log('some technical error ocured');
+    }
+
+    ws.disconnect = function (event) {
+        console.log('connection has been disconnected', event);
+
+
     }
 
 
 
 
+// code for sending message on submit button action...
+    document.getElementById("submit").onclick = function (event){
+        const msg = document.getElementById("message").value;
+        console.log('before', typeof(msg))
+        console.log('this is message', msg);
+        msgf = JSON.stringify(msg)
+        ws.send(msg)
+        document.getElementById("message").value = ''
 
 
 
-
-
+       }
+        
 
     </script>
 
