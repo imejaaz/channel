@@ -19,18 +19,19 @@
 
     <script>
 
-    var ws = new WebSocket ('ws://127.0.0.1:8000/ws/sc/')
+    var ws = new WebSocket ('ws://127.0.0.1:8000/ws/asc/')
 
     ws.onopen = function (event) {
         console.log('connection establised sucessfuly');
-        ws.send('message from client');
+        // ws.send('message from client');
     }
 
     ws.onmessage = function (event) {
         console.log('message received', event);
         var message = event.data
         console.log(message);
-        var textarea = document.getElementById("chat-log").innerText += message + '\n';
+        var textarea = document.getElementById("chat-log");
+        textarea.value+=message + '\n';
     }
 
     ws.onerror = function (event) {
