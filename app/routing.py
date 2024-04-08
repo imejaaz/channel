@@ -5,6 +5,6 @@ from . import consumer
 
 websocket_urlpatterns=[
 
-path('ws/sc/', consumer.sconsumer.as_asgi()),
-path('ws/asc/', consumer.asconsumer.as_asgi())
+path('ws/sc/<str:GroupName>/', consumer.sconsumer.as_asgi()),
+path('ws/asc/<str:GroupName>/', consumer.asconsumer.as_asgi())
 ]

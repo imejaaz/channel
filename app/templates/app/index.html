@@ -6,7 +6,9 @@
     <title>Chat</title>
 </head>
 <body>
-    <p>Welcome to my Chat application</p>
+    <h2>Welcome to my Chat application</h2>
+    <h1>{{group}}</h1>
+    {{ group |json_script:"group_name" }}
     <textarea  id="chat-log" cols="80" rows="20"></textarea><br>
     <input type="text" id="message" size="86" placeholder="type your message here"><br>
     <div align="right"><input type="button" id="submit" value="send" align="right"></div>
@@ -18,12 +20,14 @@
 
 
     <script>
-
-    var ws = new WebSocket ('ws://127.0.0.1:8000/ws/asc/')
-
+        const group_name = JSON.parse(document.getElementById("group_name").textContent)
+    
+    
+    var ws = new WebSocket ('ws://127.0.0.1:8000/ws/asc/'+group_name+'/')
+        
     ws.onopen = function (event) {
         console.log('connection establised sucessfuly');
-        // ws.send('message from client');
+
     }
 
     ws.onmessage = function (event) {
@@ -32,8 +36,9 @@
         console.log(message);
         var textarea = document.getElementById("chat-log");
         textarea.value+=message + '\n';
-    }
 
+    }
+ 
     ws.onerror = function (event) {
         console.log('some technical error ocured');
     }
@@ -43,7 +48,6 @@
 
 
     }
-
 
 
 
