@@ -3,8 +3,8 @@ from channels.consumer import SyncConsumer
 from asgiref.sync import async_to_sync
 from channels.exceptions import StopConsumer
 import json
-
-
+from .models import group, messages
+from channels.db import database_sync_to_async
 
 class sconsumer(SyncConsumer):
     def websocket_connect(self, event):
@@ -22,6 +22,7 @@ class sconsumer(SyncConsumer):
     def websocket_receive(self, event):
         message = event['text']
         print(message)
+
         async_to_sync(self.channel_layer.group_send)(    
         self.group_name,
         {
@@ -29,6 +30,9 @@ class sconsumer(SyncConsumer):
             'message':event['text']
         })
 
+        Group = group.objects.get(name = self.group_name)
+        chat = messages(content = message, group = Group)
+        chat.save()
     def chat_message(self, event):
         self.send({
             'type':'websocket.send',
@@ -69,6 +73,11 @@ class asconsumer(AsyncConsumer):
             'type':'chat.message',
             'message':event['text']
         })
+        
+        Group = await database_sync_to_async (group.objects.get)(name = self.group_name)
+        chat = messages(content = message, group = Group)
+        await database_sync_to_async (chat.save)()
+
     async def chat_message(self, event):
         await self.send({
             'type':'websocket.send',
