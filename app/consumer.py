@@ -23,20 +23,32 @@ class sconsumer(SyncConsumer):
         message = event['text']
         print(message)
 
-        async_to_sync(self.channel_layer.group_send)(    
-        self.group_name,
-        {
+     
+        
+        if self.scope['user'].is_authenticated:
+
+            async_to_sync(self.channel_layer.group_send)(    
+            self.group_name,
+            {
             'type':'chat.message',
             'message':event['text']
-        })
+            })
 
-        Group = group.objects.get(name = self.group_name)
-        chat = messages(content = message, group = Group)
-        chat.save()
+            Group = group.objects.get(name = self.group_name)
+            chat = messages(content = message, group = Group)
+            chat.save()
+        else:
+            self.send({
+                'type':'websocket.send',
+                'text':json.dumps('login required')
+            })
+            
     def chat_message(self, event):
         self.send({
             'type':'websocket.send',
-            'text':event['message']
+            'text':json.dumps({
+                'message':event['message'], 
+                'username':self.scope['user'].username})
         })
     def websocket_disconnect(self, event):
         print("connection disconnected...", event)
@@ -67,16 +79,28 @@ class asconsumer(AsyncConsumer):
 
         message = event['text']
         print(message)
-        await self.channel_layer.group_send(    
-        self.group_name,
-        {
-            'type':'chat.message',
-            'message':event['text']
-        })
         
-        Group = await database_sync_to_async (group.objects.get)(name = self.group_name)
-        chat = messages(content = message, group = Group)
-        await database_sync_to_async (chat.save)()
+        UserName = self.scope['user']
+        if self.scope['user'].is_authenticated:
+
+            await self.channel_layer.group_send(    
+                    self.group_name,
+                    {
+                        'type':'chat.message',
+                        'message':event['text']
+                    })
+
+
+            Group = await database_sync_to_async (group.objects.get)(name = self.group_name)
+            chat = messages(content = message, group = Group)
+            await database_sync_to_async (chat.save)()
+
+        else:
+
+            await self.send({
+                'type':'websocket.send',
+                'text':json.dumps('login required')
+            })
 
     async def chat_message(self, event):
         await self.send({

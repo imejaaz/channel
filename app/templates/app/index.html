@@ -24,8 +24,8 @@
     <script>
         const group_name = JSON.parse(document.getElementById("group_name").textContent)
     
-    
-    var ws = new WebSocket ('ws://127.0.0.1:8000/ws/asc/'+group_name+'/')
+        
+    var ws = new WebSocket ('ws://127.0.0.1:8000/ws/sc/'+group_name+'/')
         
     ws.onopen = function (event) {
         console.log('connection establised sucessfuly');
@@ -34,10 +34,13 @@
 
     ws.onmessage = function (event) {
         console.log('message received', event);
-        var message = event.data
-        console.log(message);
+        console.log('message received data', event.data);
+        var data = JSON.parse(event.data)
+        var message = data.message
+        var user = data.username
+
         var textarea = document.getElementById("chat-log");
-        textarea.value+=message + '\n';
+        textarea.value+=user+': ' +message + '\n';
 
     }
  
